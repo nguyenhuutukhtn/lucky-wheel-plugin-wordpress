@@ -1,0 +1,129 @@
+.lucky-wheel-wrapper {
+    font-family: 'Arial', sans-serif;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: linear-gradient(145deg, #f3f4f6, #dde1e7);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.lucky-wheel-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 20px;
+}
+
+.wheel-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0) 0%,rgba(255,255,255,0) 50%,rgba(255,255,255,0.2) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 8px #f3f4f6, 0 0 0 10px #e1e5ea;
+    z-index: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wheel-center:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 10px #f3f4f6, 0 0 0 12px #e1e5ea;
+}
+
+.wheel-center span {
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    transition: opacity 0.3s ease;
+}
+
+.wheel-center.spinning span {
+    opacity: 0;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    width: 40px;
+    height: 40px;
+}
+
+.pointer-base {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background: #333;
+    border-radius: 20px 20px 0 0;
+}
+
+.pointer-triangle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #333;
+}
+
+#lucky-wheel {
+    display: block;
+    margin: 0 auto;
+    transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.lucky-wheel-controls {
+    text-align: center;
+}
+
+.result-display {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.result-display.show {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes spin-center {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.wheel-center.spinning {
+    animation: spin-center 0.5s linear infinite;
+}
