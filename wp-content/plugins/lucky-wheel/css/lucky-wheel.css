@@ -3,7 +3,7 @@
     max-width: 100%;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
@@ -14,7 +14,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 40px;
 }
 
 /* Styles for the registration form */
@@ -62,9 +62,8 @@
 /* Styles for the lucky wheel */
 .lucky-wheel-game {
     width: 100%;
-    max-width: 300px;
     position: relative;
-    margin: 0 auto;
+    top: 20px;
 }
 
 #lucky-wheel {
@@ -117,14 +116,16 @@
 
 .wheel-pointer {
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
     width: 30px;
-    height: 30px;
+    height: 40px;
     background: #FF4500;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    clip-path: polygon(0% 0%, 50% 100%, 100% 0%);
     z-index: 3;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
 }
 
 .wheel-center:hover {
@@ -147,23 +148,39 @@
 
 .pointer-base {
     position: absolute;
-    width: 40px;
-    height: 20px;
-    background: #333;
-    border-radius: 20px 20px 0 0;
-}
-
-.pointer-triangle {
-    position: absolute;
-    bottom: 0;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    background: #FF4500;
+    border-radius: 50%;
+    z-index: 4;
+}
+
+.pointer-base::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background: #ffea07;
+    border-radius: 50%;
+}
+
+/* .pointer-triangle {
+    position: absolute;
+    top: 0;
+    left: 10;
+    right: 10;
     width: 0;
     height: 0;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-top: 25px solid #333;
-}
+} */
 
 
 
@@ -195,6 +212,19 @@
 
 .wheel-center.spinning {
     animation: spin-center 0.5s linear infinite;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.fb-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    text-align: center;
+
 }
 
 /* Responsive design */

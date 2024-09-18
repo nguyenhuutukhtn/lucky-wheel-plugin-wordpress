@@ -5,6 +5,7 @@
         const wheelCenter = document.getElementById('wheel-center');
         const spinText = document.getElementById('spin-text');
         const resultDiv = document.getElementById('result');
+        const facebookLink = document.getElementById('fb-link');
         const form = $('#lucky-wheel-form');
 
         const wheelConfig = {
@@ -106,35 +107,35 @@
         }
 
         function createWheel() {
-            const wheel = document.getElementById('lucky-wheel');
-            const segmentAngle = 360 / wheelConfig.segments.length;
+    const wheel = document.getElementById('lucky-wheel');
+    const segmentAngle = 360 / wheelConfig.segments.length;
+
+    wheelConfig.segments.forEach((segment, index) => {
+        const startAngle = index * segmentAngle;
+        const endAngle = (index + 1) * segmentAngle;
         
-            wheelConfig.segments.forEach((segment, index) => {
-                const startAngle = index * segmentAngle;
-                const endAngle = (index + 1) * segmentAngle;
-                
-                const segmentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const x1 = 50 + 50 * Math.cos(Math.PI * startAngle / 180);
-                const y1 = 50 + 50 * Math.sin(Math.PI * startAngle / 180);
-                const x2 = 50 + 50 * Math.cos(Math.PI * endAngle / 180);
-                const y2 = 50 + 50 * Math.sin(Math.PI * endAngle / 180);
-                
-                segmentPath.setAttribute("d", `M50,50 L${x1},${y1} A50,50 0 0,1 ${x2},${y2} Z`);
-                segmentPath.setAttribute("class", "wheel-segment");
-                wheel.appendChild(segmentPath);
+        const segmentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        const x1 = 50 + 50 * Math.cos(Math.PI * startAngle / 180);
+        const y1 = 50 + 50 * Math.sin(Math.PI * startAngle / 180);
+        const x2 = 50 + 50 * Math.cos(Math.PI * endAngle / 180);
+        const y2 = 50 + 50 * Math.sin(Math.PI * endAngle / 180);
         
-                const textX = 50 + 35 * Math.cos(Math.PI * (startAngle + segmentAngle / 2) / 180);
-                const textY = 50 + 35 * Math.sin(Math.PI * (startAngle + segmentAngle / 2) / 180);
-                
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", textX);
-                text.setAttribute("y", textY);
-                text.setAttribute("class", "prize-text");
-                text.setAttribute("transform", `rotate(${startAngle + segmentAngle / 2}, ${textX}, ${textY})`);
-                text.textContent = segment.prize;
-                wheel.appendChild(text);
-            });
-        }
+        segmentPath.setAttribute("d", `M50,50 L${x1},${y1} A50,50 0 0,1 ${x2},${y2} Z`);
+        segmentPath.setAttribute("class", "wheel-segment");
+        wheel.appendChild(segmentPath);
+
+        const textX = 50 + 35 * Math.cos(Math.PI * (startAngle + segmentAngle / 2) / 180);
+        const textY = 50 + 35 * Math.sin(Math.PI * (startAngle + segmentAngle / 2) / 180);
+        
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", textX);
+        text.setAttribute("y", textY);
+        text.setAttribute("class", "prize-text");
+        text.setAttribute("transform", `rotate(${startAngle + segmentAngle / 2}, ${textX}, ${textY})`);
+        text.textContent = segment.prize;
+        wheel.appendChild(text);
+    });
+}
 
         createWheel();
 
@@ -164,13 +165,23 @@
                     wheelCenter.classList.remove('spinning');
                     
                     // Calculate the winning segment
-                    const segmentAngle = 360 / wheelConfig.segments.length;
-                    const winningSegmentIndex = Math.floor(((360 - (startAngle % 360)) % 360) / segmentAngle);
+                    let finalAngle = startAngle % (Math.PI * 2);
+                    if (finalAngle < 0) finalAngle += Math.PI * 2;
+                    const segmentAngle = (Math.PI * 2) / wheelConfig.segments.length;
+                    
+                    // Adjust the final angle to account for the pointer's starting position
+                    const pointerOffset = Math.PI / 2; // Assuming the pointer starts at the top (90 degrees)
+                    finalAngle = (finalAngle + pointerOffset) % (Math.PI * 2);
+                    
+                    // Calculate the winning segment index
+                    const winningSegmentIndex = Math.floor((Math.PI * 2 - finalAngle) / segmentAngle) % wheelConfig.segments.length;
+                    
                     const winningSegment = wheelConfig.segments[winningSegmentIndex];
                     
-                    resultDiv.textContent = "You won: " + winningSegment.label;
+                    resultDiv.textContent = "Phần thưởng của bạn: " + winningSegment.label;
                     spinText.style.opacity = '1';
                     spinText.textContent = 'SPIN!';
+                    facebookLink.classList.remove('hidden');
                 }
             }
 

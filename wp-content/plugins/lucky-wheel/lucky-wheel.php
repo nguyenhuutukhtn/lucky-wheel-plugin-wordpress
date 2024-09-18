@@ -6,7 +6,8 @@
  * Author: Your Name
  */
 
-function lucky_wheel_enqueue_scripts() {
+function lucky_wheel_enqueue_scripts()
+{
     wp_enqueue_style('lucky-wheel-style', plugin_dir_url(__FILE__) . 'css/lucky-wheel.css');
     wp_enqueue_script('lucky-wheel-script', plugin_dir_url(__FILE__) . 'js/lucky-wheel.js', array('jquery'), '2.1', true);
     wp_localize_script('lucky-wheel-script', 'lucky_wheel_ajax', array(
@@ -15,7 +16,8 @@ function lucky_wheel_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'lucky_wheel_enqueue_scripts');
 
-function lucky_wheel_shortcode() {
+function lucky_wheel_shortcode()
+{
     ob_start();
     ?>
     <div class="lucky-wheel-wrapper">
@@ -37,19 +39,26 @@ function lucky_wheel_shortcode() {
                     <span id="spin-text">SPIN</span>
                 </div>
                 <div class="wheel-pointer">
-                    <div class="pointer-base"></div>
                     <div class="pointer-triangle"></div>
                 </div>
+                <div class="pointer-base">
+                    <div class="pointer-base-inner"></div>
+                </div>
+
             </div>
         </div>
         <div id="result" class="result-display"></div>
-    </div>
-    <?php
-    return ob_get_clean();
+        <!-- facebook link to contact receive prize -->
+        <div id="fb-link" class="fb-link hidden">
+            <a href="https://www.facebook.com/your-fb-page" target="_blank">Liên hệ nhận quà</a>
+        </div>
+        <?php
+        return ob_get_clean();
 }
 add_shortcode('lucky_wheel', 'lucky_wheel_shortcode');
 
-function handle_registration_form() {
+function handle_registration_form()
+{
     // Process form data here
     wp_send_json_success('Registration successful!');
 }
