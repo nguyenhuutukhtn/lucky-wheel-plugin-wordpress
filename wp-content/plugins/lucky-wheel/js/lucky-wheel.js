@@ -5,6 +5,7 @@
         const wheelCenter = document.getElementById('wheel-center');
         const spinText = document.getElementById('spin-text');
         const resultDiv = document.getElementById('result');
+        const form = $('#lucky-wheel-form');
 
         const wheelConfig = {
             segments: [
@@ -17,49 +18,83 @@
             ],
             centerX: canvas.width / 2,
             centerY: canvas.height / 2,
-            radius: 145,
+            radius: 140,
             textDistance: 60
         };
 
         let isSpinning = false;
         let startAngle = 0;
+        let isFormSubmitted = false;
+
+        // Draw the wheel initially
+        drawWheel();
+
+        // Handle form submission
+        form.on('submit', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                $.ajax({
+                    url: lucky_wheel_ajax.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'lucky_wheel_register',
+                        formData: form.serialize()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            isFormSubmitted = true;
+                            enableWheel();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX error: " + status + ": " + error);
+                    }
+                });
+            }
+        });
+
+        function validateForm() {
+            let isValid = true;
+            form.find('input[required]').each(function() {
+                if ($(this).val().trim() === '') {
+                    isValid = false;
+                    $(this).addClass('error');
+                } else {
+                    $(this).removeClass('error');
+                }
+            });
+            return isValid;
+        }
+
+        function enableWheel() {
+            wheelCenter.style.pointerEvents = 'auto';
+            spinText.textContent = 'SPIN!';
+        }
 
         function drawWheel() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
             ctx.translate(wheelConfig.centerX, wheelConfig.centerY);
+            ctx.rotate(startAngle);
 
             const segmentAngle = (Math.PI * 2) / wheelConfig.segments.length;
+
             for (let i = 0; i < wheelConfig.segments.length; i++) {
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
-                ctx.arc(0, 0, wheelConfig.radius, startAngle + segmentAngle * i, startAngle + segmentAngle * (i + 1));
+                ctx.arc(0, 0, wheelConfig.radius, i * segmentAngle, (i + 1) * segmentAngle);
                 ctx.lineTo(0, 0);
                 ctx.fillStyle = wheelConfig.segments[i].color;
                 ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
                 ctx.stroke();
-
-                // Add shading
-                ctx.save();
-                ctx.clip();
-                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, wheelConfig.radius);
-                gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
-                gradient.addColorStop(1, 'rgba(0,0,0,0.2)');
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                ctx.restore();
 
                 // Draw text
                 ctx.save();
-                ctx.rotate(startAngle + segmentAngle * (i + 0.5));
+                ctx.rotate(segmentAngle / 2 + i * segmentAngle);
                 ctx.textAlign = 'right';
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 16px Arial';
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 5;
-                ctx.fillText(wheelConfig.segments[i].label, wheelConfig.radius - wheelConfig.textDistance, 5);
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText(wheelConfig.segments[i].label, wheelConfig.radius - 10, 5);
                 ctx.restore();
             }
 
@@ -70,8 +105,41 @@
             return 1 - Math.pow(1 - t, 3);
         }
 
+        function createWheel() {
+            const wheel = document.getElementById('lucky-wheel');
+            const segmentAngle = 360 / wheelConfig.segments.length;
+        
+            wheelConfig.segments.forEach((segment, index) => {
+                const startAngle = index * segmentAngle;
+                const endAngle = (index + 1) * segmentAngle;
+                
+                const segmentPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const x1 = 50 + 50 * Math.cos(Math.PI * startAngle / 180);
+                const y1 = 50 + 50 * Math.sin(Math.PI * startAngle / 180);
+                const x2 = 50 + 50 * Math.cos(Math.PI * endAngle / 180);
+                const y2 = 50 + 50 * Math.sin(Math.PI * endAngle / 180);
+                
+                segmentPath.setAttribute("d", `M50,50 L${x1},${y1} A50,50 0 0,1 ${x2},${y2} Z`);
+                segmentPath.setAttribute("class", "wheel-segment");
+                wheel.appendChild(segmentPath);
+        
+                const textX = 50 + 35 * Math.cos(Math.PI * (startAngle + segmentAngle / 2) / 180);
+                const textY = 50 + 35 * Math.sin(Math.PI * (startAngle + segmentAngle / 2) / 180);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", textX);
+                text.setAttribute("y", textY);
+                text.setAttribute("class", "prize-text");
+                text.setAttribute("transform", `rotate(${startAngle + segmentAngle / 2}, ${textX}, ${textY})`);
+                text.textContent = segment.prize;
+                wheel.appendChild(text);
+            });
+        }
+
+        createWheel();
+
         function spinWheel() {
-            if (isSpinning) return;
+            if (isSpinning || !isFormSubmitted) return;
             isSpinning = true;
             wheelCenter.classList.add('spinning');
             spinText.style.opacity = '0';
@@ -96,28 +164,20 @@
                     wheelCenter.classList.remove('spinning');
                     
                     // Calculate the winning segment
-                    let finalAngle = startAngle % (Math.PI * 2);
-                    if (finalAngle < 0) finalAngle += Math.PI * 2;
-                    const segmentAngle = (Math.PI * 2) / wheelConfig.segments.length;
-                    
-                    // Adjust the final angle to account for the pointer's starting position
-                    const pointerOffset = Math.PI / 2; // Assuming the pointer starts at the top (90 degrees)
-                    finalAngle = (finalAngle + pointerOffset) % (Math.PI * 2);
-                    
-                    // Calculate the winning segment index
-                    const winningSegmentIndex = Math.floor((Math.PI * 2 - finalAngle) / segmentAngle) % wheelConfig.segments.length;
-                    
+                    const segmentAngle = 360 / wheelConfig.segments.length;
+                    const winningSegmentIndex = Math.floor(((360 - (startAngle % 360)) % 360) / segmentAngle);
                     const winningSegment = wheelConfig.segments[winningSegmentIndex];
+                    
                     resultDiv.textContent = "You won: " + winningSegment.label;
-                    resultDiv.classList.add('show');
-                    setTimeout(() => resultDiv.classList.remove('show'), 500);
+                    spinText.style.opacity = '1';
+                    spinText.textContent = 'SPIN!';
                 }
             }
 
             requestAnimationFrame(animate);
         }
 
-        wheelCenter.addEventListener('click', spinWheel);
-        drawWheel();
+        document.querySelector('.wheel-center').addEventListener('click', spinWheel);
+        wheelCenter.style.pointerEvents = 'none'; // Disable spinning until form is submitted
     });
 })(jQuery);
