@@ -142,6 +142,7 @@
         function spinWheel() {
             if (isSpinning || !isFormSubmitted) return;
             isSpinning = true;
+            facebookLink.classList.add('hidden');
             wheelCenter.classList.add('spinning');
             spinText.style.opacity = '0';
             resultDiv.textContent = '';
