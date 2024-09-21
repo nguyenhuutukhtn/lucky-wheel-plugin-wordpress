@@ -8,21 +8,16 @@
         const facebookLink = document.getElementById('fb-link');
         const form = $('#lucky-wheel-form');
 
+
         const wheelConfig = {
-            segments: [
-                {color: "#FF6B6B", label: "Prize 1"},
-                {color: "#4ECDC4", label: "Prize 2"},
-                {color: "#45B7D1", label: "Prize 3"},
-                {color: "#F7DC6F", label: "Prize 4"},
-                {color: "#B8E994", label: "Prize 5"},
-                {color: "#FF9FF3", label: "Prize 6"}
-            ],
+            segments: lucky_wheel_config.segments,
             centerX: canvas.width / 2,
             centerY: canvas.height / 2,
             radius: 140,
             textDistance: 60
         };
 
+        
         let isSpinning = false;
         let startAngle = 0;
         let isFormSubmitted = false;
