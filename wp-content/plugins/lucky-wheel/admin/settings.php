@@ -16,7 +16,7 @@ function lucky_wheel_settings_page() {
 
 function lucky_wheel_settings_init() {
     register_setting('lucky_wheel_options', 'lucky_wheel_segments');
-    register_setting('lucky_wheel_options', 'lucky_wheel_form_fields');
+    register_setting('lucky_wheel_options', 'lucky_wheel_form_fields', 'lucky_wheel_sanitize_form_fields');
     register_setting('lucky_wheel_options', 'lucky_wheel_facebook_page');
 
     add_settings_section(
@@ -79,7 +79,7 @@ function lucky_wheel_segments_callback() {
     // Add new segment form
     echo '<div id="new-segment-form" style="display:none; margin-top: 20px;">';
     echo '<h4>Add New Segment</h4>';
-    echo '<input type="text" id="new-segment-color" placeholder="Color (e.g., #FF0000)" />';
+    echo '<input type="text" id="new-segment-color" class="color-picker" placeholder="Color (e.g., #FF0000)" />';
     echo '<input type="text" id="new-segment-label" placeholder="Prize Label" />';
     echo '<button type="button" id="save-new-segment">Save Segment</button>';
     echo '<button type="button" id="cancel-new-segment">Cancel</button>';
@@ -88,9 +88,12 @@ function lucky_wheel_segments_callback() {
     ?>
     <script>
     jQuery(document).ready(function($) {
+        $('.color-picker').wpColorPicker();
+
         $('#add-segment').on('click', function() {
             $('#new-segment-form').show();
             $(this).hide();
+            $('#new-segment-color').wpColorPicker();
         });
 
         $('#cancel-new-segment').on('click', function() {
@@ -124,8 +127,6 @@ function lucky_wheel_segments_callback() {
         $(document).on('click', '.remove-segment', function() {
             $(this).closest('.segment-row').remove();
         });
-
-        $('.color-picker').wpColorPicker();
     });
     </script>
     <?php
@@ -148,7 +149,7 @@ function lucky_wheel_form_fields_callback() {
         echo '<option value="tel"' . selected($field['type'], 'tel', false) . '>Telephone</option>';
         echo '</select>';
         echo '<input type="text" name="lucky_wheel_form_fields[' . $index . '][label]" value="' . esc_attr($field['label']) . '" placeholder="Field Label" />';
-        echo '<label><input type="checkbox" name="lucky_wheel_form_fields[' . $index . '][required]" ' . checked($field['required'], true, false) . ' /> Required</label>';
+        echo '<label><input type="checkbox" name="lucky_wheel_form_fields[' . $index . '][required]" ' . checked(isset($field['required']) ? $field['required'] : false, true, false) . ' /> Required</label>';
         echo '<button type="button" class="remove-field">Remove</button>';
         echo '</div>';
     }
@@ -185,6 +186,19 @@ function lucky_wheel_facebook_page_callback() {
     $facebook_page = get_option('lucky_wheel_facebook_page', 'https://www.facebook.com/your-fb-page');
     echo '<input type="url" name="lucky_wheel_facebook_page" value="' . esc_url($facebook_page) . '" class="regular-text">';
     echo '<p class="description">Enter the URL of your Facebook page for the "Contact to receive prize" link.</p>';
+}
+
+function lucky_wheel_sanitize_form_fields($input) {
+    $sanitized_input = [];
+    foreach ($input as $field) {
+        $sanitized_field = [
+            'type' => sanitize_text_field($field['type']),
+            'label' => sanitize_text_field($field['label']),
+            'required' => isset($field['required']) ? true : false
+        ];
+        $sanitized_input[] = $sanitized_field;
+    }
+    return $sanitized_input;
 }
 
 add_action('admin_init', 'lucky_wheel_settings_init');

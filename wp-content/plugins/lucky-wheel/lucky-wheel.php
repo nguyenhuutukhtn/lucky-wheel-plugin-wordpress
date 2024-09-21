@@ -22,13 +22,18 @@ add_action('wp_enqueue_scripts', 'lucky_wheel_enqueue_scripts');
 
 function lucky_wheel_shortcode() {
     ob_start();
+    
+    // Get form fields from settings
     $form_fields = get_option('lucky_wheel_form_fields', [
         ['type' => 'text', 'label' => 'Name', 'required' => true],
         ['type' => 'email', 'label' => 'Email', 'required' => true],
         ['type' => 'tel', 'label' => 'Phone', 'required' => true],
         ['type' => 'text', 'label' => 'Website', 'required' => false]
     ]);
+
+    // Get Facebook page URL from settings
     $facebook_page = get_option('lucky_wheel_facebook_page', 'https://www.facebook.com/your-fb-page');
+
     ?>
     <div class="lucky-wheel-wrapper">
         <div class="lucky-wheel-container">
@@ -40,7 +45,7 @@ function lucky_wheel_shortcode() {
                             type="<?php echo esc_attr($field['type']); ?>" 
                             name="<?php echo esc_attr(strtolower($field['label'])); ?>" 
                             placeholder="<?php echo esc_attr($field['label']); ?>"
-                            <?php echo $field['required'] ? 'required' : ''; ?>
+                            <?php echo isset($field['required']) && $field['required'] ? 'required' : ''; ?>
                         >
                     <?php endforeach; ?>
                     <button type="submit">Bắt đầu</button>
@@ -58,7 +63,6 @@ function lucky_wheel_shortcode() {
                 <div class="pointer-base">
                     <div class="pointer-base-inner"></div>
                 </div>
-
             </div>
         </div>
         <div id="result" class="result-display"></div>
@@ -66,8 +70,9 @@ function lucky_wheel_shortcode() {
         <div id="fb-link" class="fb-link hidden">
             <a href="<?php echo esc_url($facebook_page); ?>" target="_blank">Liên hệ nhận quà</a>
         </div>
-        <?php
-        return ob_get_clean();
+    </div>
+    <?php
+    return ob_get_clean();
 }
 add_shortcode('lucky_wheel', 'lucky_wheel_shortcode');
 
@@ -102,7 +107,7 @@ function lucky_wheel_admin_enqueue_scripts($hook) {
     }
     wp_enqueue_style('wp-color-picker');
     wp_enqueue_script('wp-color-picker');
-    // If you need to add custom scripts for the admin page, enqueue them here
+    wp_enqueue_script('lucky-wheel-admin', plugin_dir_url(__FILE__) . 'js/lucky-wheel-admin.js', array('jquery', 'wp-color-picker'), '1.0', true);
 }
 add_action('admin_enqueue_scripts', 'lucky_wheel_admin_enqueue_scripts');
 
